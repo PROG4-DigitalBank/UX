@@ -4,8 +4,8 @@ CREATE TABLE customers (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100),
     phone_number VARCHAR(20),
-    address VARCHAR(255),
     monthly_salary DECIMAL(15, 2) NOT NULL 
 );
 
