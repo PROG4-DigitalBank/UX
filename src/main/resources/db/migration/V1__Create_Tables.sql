@@ -6,7 +6,6 @@ CREATE TABLE customers (
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(100),
     phone_number VARCHAR(20),
-    monthly_salary DECIMAL(15, 2) NOT NULL 
 );
 
 -- Table for storing account information
@@ -15,6 +14,7 @@ CREATE TABLE accounts (
     customer_id INT REFERENCES customers(customer_id),
     account_number VARCHAR(20) UNIQUE NOT NULL,
     balance DECIMAL(15, 2) DEFAULT 0.00,
+    monthly_salary DECIMAL(15, 2) NOT NULL 
     allows_overdraft BOOLEAN DEFAULT FALSE,
     overdraft_limit DECIMAL(15, 2) DEFAULT 0.00,
     overdraft_interest_rate DECIMAL(5, 2),

@@ -7,8 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-
 @RestController
 @RequestMapping("/customers")
 public class CustomerController {
@@ -22,8 +20,8 @@ public class CustomerController {
     @PostMapping("/signup")
     public ResponseEntity<Customer> signUp(@RequestParam String firstName, @RequestParam String lastName,
                                            @RequestParam String email, @RequestParam String password,
-                                           @RequestParam String phoneNumber, @RequestParam BigDecimal monthlySalary) {
-        Customer customer = customerService.signUp(firstName, lastName, email, password, phoneNumber, monthlySalary);
+                                           @RequestParam String phoneNumber) {
+        Customer customer = customerService.signUp(firstName, lastName, email, password, phoneNumber);
         return new ResponseEntity<>(customer, HttpStatus.CREATED);
     }
 

@@ -28,7 +28,6 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
             statement.setString(3, entity.getEmail());
             statement.setString(4, entity.getPassword());
             statement.setString(5, entity.getPhoneNumber());
-            statement.setBigDecimal(6, entity.getMonthlySalary());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -87,7 +86,6 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
             statement.setString(3, entity.getEmail());
             statement.setString(4, entity.getPassword());
             statement.setString(5, entity.getPhoneNumber());
-            statement.setBigDecimal(6, entity.getMonthlySalary());
             statement.setLong(7, entity.getCustomerId());
 
             int affectedRows = statement.executeUpdate();
@@ -138,7 +136,6 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
         customer.setEmail(resultSet.getString("email"));
         customer.setPassword(resultSet.getString("password"));
         customer.setPhoneNumber(resultSet.getString("phone_number"));
-        customer.setMonthlySalary(resultSet.getBigDecimal("monthly_salary"));
         return customer;
     }
 }

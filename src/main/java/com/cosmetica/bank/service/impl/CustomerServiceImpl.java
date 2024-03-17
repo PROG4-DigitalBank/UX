@@ -1,7 +1,5 @@
 package com.cosmetica.bank.service.impl;
 
-import java.math.BigDecimal;
-
 import com.cosmetica.bank.model.Customer;
 import com.cosmetica.bank.repository.CustomerRepository;
 import com.cosmetica.bank.service.CustomerService;
@@ -15,14 +13,13 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
-    public Customer signUp(String firstName, String lastName, String email, String password, String phoneNumber, BigDecimal monthlySalary) {
+    public Customer signUp(String firstName, String lastName, String email, String password, String phoneNumber) {
         Customer customer = new Customer();
         customer.setFirstName(firstName);
         customer.setLastName(lastName);
         customer.setEmail(email);
         customer.setPassword(password);
         customer.setPhoneNumber(phoneNumber);
-        customer.setMonthlySalary(monthlySalary);
         
         return customerRepository.save(customer);
     }
