@@ -7,6 +7,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.springframework.context.annotation.Configuration;
+
+
+@Configuration
 public class DatabaseConnection {
 
     private static final Properties properties = new Properties();

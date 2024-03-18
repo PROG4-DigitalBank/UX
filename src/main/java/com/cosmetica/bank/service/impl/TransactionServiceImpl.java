@@ -39,7 +39,7 @@ public class TransactionServiceImpl implements TransactionService {
             withdrawalTransaction.setAmount(amount);
             withdrawalTransaction.setTransactionType("Withdrawal");
             withdrawalTransaction.setTransactionReason("Withdrawal from account");
-            // Appeler le repository pour enregistrer la transaction
+
             transactionRepository.save(withdrawalTransaction);
         } else {
             throw new IllegalArgumentException("Insufficient funds for withdrawal");
