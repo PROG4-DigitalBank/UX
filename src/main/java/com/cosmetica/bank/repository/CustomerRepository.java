@@ -19,7 +19,7 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
 
     @Override
     public Customer save(Customer entity) {
-        String sql = "INSERT INTO customers (first_name, last_name, email, password, phone_number, monthly_salary) " +
+        String sql = "INSERT INTO customers (first_name, last_name, email, password, phone_number) " +
                 "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -42,7 +42,7 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error saving customer.", ex);
         }
         return entity;
     }
@@ -57,7 +57,7 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
                 return mapToCustomer(resultSet);
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding customer by ID.", ex);
         }
         return null;
     }
@@ -72,28 +72,28 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
                 customers.add(mapToCustomer(resultSet));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding all customers.", ex);
         }
         return customers;
     }
 
     @Override
     public Customer update(Customer entity) {
-        String sql = "UPDATE customers SET first_name = ?, last_name = ?, email = ?, password = ?, phone_number = ?, monthly_salary = ? WHERE customer_id = ?";
+        String sql = "UPDATE customers SET first_name = ?, last_name = ?, email = ?, password = ?, phone_number = ? WHERE customer_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, entity.getFirstName());
             statement.setString(2, entity.getLastName());
             statement.setString(3, entity.getEmail());
             statement.setString(4, entity.getPassword());
             statement.setString(5, entity.getPhoneNumber());
-            statement.setLong(7, entity.getCustomerId());
+            statement.setLong(6, entity.getCustomerId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Updating customer failed, no rows affected.");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error updating customer.", ex);
         }
         return entity;
     }
@@ -108,9 +108,12 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
         String sql = "DELETE FROM customers WHERE customer_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
-            statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deleting customer failed, no rows affected.");
+            }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error deleting customer.", ex);
         }
     }
 
@@ -123,10 +126,10 @@ public class CustomerRepository implements CrudInterface<Customer, Long> {
                 return mapToCustomer(resultSet);
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding customer by email.", ex);
         }
         return null;
-    }    
+    }
 
     private Customer mapToCustomer(ResultSet resultSet) throws SQLException {
         Customer customer = new Customer();
