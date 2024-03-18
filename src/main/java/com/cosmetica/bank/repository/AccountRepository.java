@@ -20,8 +20,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
     @Override
     public Account save(Account entity) {
         String sql = "INSERT INTO accounts (customer_id, account_number, balance, monthly_salary, allows_overdraft, overdraft_limit, overdraft_interest_rate, loan_interest) "
-                +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, entity.getCustomerId());
             statement.setString(2, entity.getAccountNumber());
@@ -45,7 +44,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 }
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error saving account.", ex);
         }
         return entity;
     }
@@ -60,7 +59,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 return mapToAccount(resultSet);
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding account by ID.", ex);
         }
         return null;
     }
@@ -75,7 +74,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 accounts.add(mapToAccount(resultSet));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding all accounts.", ex);
         }
         return accounts;
     }
@@ -99,7 +98,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 throw new SQLException("Updating account failed, no rows affected.");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error updating account.", ex);
         }
         return entity;
     }
@@ -114,9 +113,12 @@ public class AccountRepository implements CrudInterface<Account, Long> {
         String sql = "DELETE FROM accounts WHERE account_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
-            statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
+            if (affectedRows == 0) {
+                throw new SQLException("Deleting account failed, no rows affected.");
+            }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error deleting account.", ex);
         }
     }
 
@@ -129,7 +131,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 return Optional.of(mapToAccount(resultSet));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding account by account number.", ex);
         }
         return Optional.empty();
     }
@@ -144,7 +146,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
                 accounts.add(mapToAccount(resultSet));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding accounts by customer ID.", ex);
         }
         return accounts;
     }
