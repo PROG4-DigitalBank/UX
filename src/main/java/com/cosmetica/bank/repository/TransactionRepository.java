@@ -11,7 +11,7 @@ import com.cosmetica.bank.model.Transaction;
 
 public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
-    // Connexion à la base de données
+    // Connection to DB
     private final Connection connection;
 
     public TransactionRepository(Connection connection) {
@@ -20,9 +20,8 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public Transaction save(Transaction entity) {
-        String sql = "INSERT INTO customers (account_id, amount,transaction_type, transaction_date, transaction_reason ) "
-                +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO customers (account_id, amount, transaction_type, transaction_date, transaction_reason) "
+                + "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, entity.getAccountId());
             statement.setBigDecimal(2, entity.getAmount());
@@ -32,20 +31,20 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
-                throw new SQLException("Transaction failed.");
+                throw new SQLException("Transaction insertion failed.");
             }
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
                     entity.setAccountId(generatedKeys.getLong(1));
                 } else {
-                    throw new SQLException("Creating customer failed, no ID obtained.");
+                    throw new SQLException("Transaction creation failed, no ID obtained.");
                 }
             }
+            return entity;
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error saving transaction.", ex);
         }
-        return entity;
     }
 
     @Override
@@ -58,7 +57,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
                 return extractTransactionFromResultSet(resultSet);
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding transaction by ID.", ex);
         }
         return null;
     }
@@ -73,7 +72,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
                 transactions.add(extractTransactionFromResultSet(resultSet));
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error finding all transactions.", ex);
         }
         return transactions;
     }
@@ -94,7 +93,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
                 throw new SQLException("Updating transaction failed, no rows affected.");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error updating transaction.", ex);
         }
         return entity;
     }
@@ -114,7 +113,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
                 throw new SQLException("Deleting transaction failed, no rows affected.");
             }
         } catch (SQLException ex) {
-            ex.printStackTrace();
+            throw new RuntimeException("Error deleting transaction.", ex);
         }
     }
 

@@ -18,8 +18,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public boolean isWithdrawalAllowed(Account account, BigDecimal amount) {
-        // Vérifier si le retrait est autorisé en fonction des fonds disponibles et du
-        // crédit autorisé
+        // Check if withdrawal is permitted based on available funds and authorized credit
         if (account.isAllowsOverdraft()) {
             BigDecimal availableBalance = account.getBalance().add(account.getOverdraftLimit());
             return availableBalance.compareTo(amount) >= 0;
@@ -30,7 +29,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void processWithdrawal(Account account, BigDecimal amount) {
-        // Procéder au retrait et enregistrer la transaction
+        // Proceed with withdrawal and record the transaction
         if (isWithdrawalAllowed(account, amount)) {
             BigDecimal newBalance = account.getBalance().subtract(amount);
             account.setBalance(newBalance);
