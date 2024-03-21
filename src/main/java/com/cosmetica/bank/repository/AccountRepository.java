@@ -19,8 +19,8 @@ public class AccountRepository implements CrudInterface<Account, Long> {
 
     @Override
     public Account save(Account entity) {
-        String sql = "INSERT INTO accounts (customer_id, account_number, balance, monthly_salary, allows_overdraft, overdraft_limit, overdraft_interest_rate, loan_interest) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (customer_id, account_number, balance, monthly_salary, allows_overdraft, overdraft_limit, overdraft_interest_rate, loan_interest, bank_name) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, entity.getCustomerId());
             statement.setString(2, entity.getAccountNumber());
@@ -30,6 +30,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
             statement.setBigDecimal(6, entity.getOverdraftLimit());
             statement.setBigDecimal(7, entity.getOverdraftInterestRate());
             statement.setBigDecimal(8, entity.getLoanInterest());
+            statement.setString(9, entity.getBankName());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
