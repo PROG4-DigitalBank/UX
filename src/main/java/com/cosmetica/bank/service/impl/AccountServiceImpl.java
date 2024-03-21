@@ -2,7 +2,9 @@
 package com.cosmetica.bank.service.impl;
 
 import com.cosmetica.bank.model.Account;
+import com.cosmetica.bank.model.Transaction;
 import com.cosmetica.bank.repository.AccountRepository;
+import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.AccountService;
 
 import java.math.BigDecimal;
@@ -17,6 +19,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Override
     public Account createAccount(Account account) {
@@ -95,11 +99,36 @@ public class AccountServiceImpl implements AccountService {
             BigDecimal interestRateAfterSevenDays) {
         Account account = accountRepository.findById(accountId);
         if (account != null) {
-            account.setOverdraftInterestRate(interestRateFirstSevenDays);
-            account.setOverdraftInterestRate(interestRateAfterSevenDays);
-            accountRepository.update(account);
+            BigDecimal balance = account.getBalance();
+            if (balance.compareTo(BigDecimal.ZERO) < 0) {
+                // The account is overdraft
+                LocalDateTime today = LocalDateTime.now();
+                LocalDateTime sevenDaysAfterCreation = account.getCreatedAt().plusDays(7);
+                BigDecimal interestRate;
+                if (today.isBefore(sevenDaysAfterCreation)) {
+                    // Within the first seven days
+                    interestRate = interestRateFirstSevenDays;
+                } else {
+                    // After the first seven days
+                    interestRate = interestRateAfterSevenDays;
+                }
+                BigDecimal interest = balance.abs().multiply(interestRate);
+                account.setBalance(balance.add(interest));
+                accountRepository.update(account);
+
+                // Recording the overdraft interest transaction
+                Transaction transaction = new Transaction();
+                transaction.setAccountId(accountId);
+                transaction.setAmount(interest);
+                transaction.setTransactionType("OVERDRAFT_INTEREST");
+                transactionRepository.save(transaction);
+            } else {
+                // The account is not overdraft
+                throw new IllegalArgumentException("Account is not overdraft.");
+            }
         } else {
-            throw new IllegalArgumentException("Account not found");
+            // Account not found
+            throw new IllegalArgumentException("Account not found.");
         }
     }
 
