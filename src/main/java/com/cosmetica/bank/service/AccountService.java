@@ -31,4 +31,6 @@ public interface AccountService {
 
     void updateOverdraftInterestRates(Long accountId, BigDecimal interestRateFirstSevenDays,
             BigDecimal interestRateAfterSevenDays);
+    String getBankName(Long accountId);
+
 }
