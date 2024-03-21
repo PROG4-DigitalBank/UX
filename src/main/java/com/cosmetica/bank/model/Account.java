@@ -21,4 +21,5 @@ public class Account {
     private BigDecimal overdraftInterestRate;
     private BigDecimal loanInterest;
     private LocalDateTime createdAt;
+    private String bankName;
 }
