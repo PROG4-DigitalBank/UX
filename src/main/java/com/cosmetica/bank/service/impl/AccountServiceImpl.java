@@ -112,16 +112,19 @@ public class AccountServiceImpl implements AccountService {
                     // Within the first seven days
                     interestRate = interestRateFirstSevenDays;
                 }
-                BigDecimal interest = balance.abs().multiply(interestRate);
-                account.setBalance(balance.add(interest));
-                accountRepository.update(account);
+                // Check if the interest rate has changed
+                if (interestRate.compareTo(account.getOverdraftInterestRate()) != 0) {
+                    BigDecimal interest = balance.abs().multiply(interestRate);
+                    account.setBalance(balance.add(interest));
+                    accountRepository.update(account);
 
-                // Recording the overdraft interest transaction
-                Transaction transaction = new Transaction();
-                transaction.setAccountId(accountId);
-                transaction.setAmount(interest);
-                transaction.setTransactionType("OVERDRAFT_INTEREST");
-                transactionRepository.save(transaction);
+                    // Recording the overdraft interest transaction
+                    Transaction transaction = new Transaction();
+                    transaction.setAccountId(accountId);
+                    transaction.setAmount(interest);
+                    transaction.setTransactionType("OVERDRAFT_INTEREST");
+                    transactionRepository.save(transaction);
+                }
             } else {
                 // The account is not overdraft
                 throw new IllegalArgumentException("Account is not overdraft.");
