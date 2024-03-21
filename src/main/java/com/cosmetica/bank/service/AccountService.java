@@ -17,6 +17,8 @@ public interface AccountService {
 
     BigDecimal getCurrentBalance(Long accountId);
 
+    BigDecimal getCurrentBalanceWithLoansAndInterest(Long accountId);
+
     void deleteAccount(Long accountId);
 
     void enableOverdraft(Long accountId);

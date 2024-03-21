@@ -86,4 +86,11 @@ public class AccountController {
         boolean overdraftEnabled = accountService.isOverdraftEnabled(accountId);
         return ResponseEntity.ok(overdraftEnabled);
     }
+
+    @GetMapping("/{accountId}/current-balance-with-loans-and-interest")
+    public ResponseEntity<BigDecimal> getCurrentBalanceWithLoansAndInterest(@PathVariable Long accountId) {
+        BigDecimal balanceWithLoansAndInterest = accountService.getCurrentBalanceWithLoansAndInterest(accountId);
+        return ResponseEntity.ok(balanceWithLoansAndInterest);
+    }
+
 }

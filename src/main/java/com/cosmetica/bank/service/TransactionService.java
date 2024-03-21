@@ -13,5 +13,9 @@ public interface TransactionService {
 
     String transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount);
 
+    BigDecimal calculateLoansAmount(Long accountId);
+
+    BigDecimal calculateInterestOnLoans(Long accountId);
+
     List<Transaction> getTransactionsByAccountId(Long accountId);
 }

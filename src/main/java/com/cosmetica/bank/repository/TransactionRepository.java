@@ -133,6 +133,22 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
         return transactions;
     }
 
+    public List<Transaction> findTransactionsByAccountIdAndTransactionType(Long accountId, String transactionType) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE account_id = ? AND transaction_type = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, accountId);
+            statement.setString(2, transactionType);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                transactions.add(extractTransactionFromResultSet(resultSet));
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Error finding transactions by account ID and transaction type.", ex);
+        }
+        return transactions;
+    }
+
     private Transaction extractTransactionFromResultSet(ResultSet resultSet) throws SQLException {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(resultSet.getLong("transaction_id"));

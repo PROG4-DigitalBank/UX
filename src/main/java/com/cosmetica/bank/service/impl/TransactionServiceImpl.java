@@ -78,4 +78,30 @@ public class TransactionServiceImpl implements TransactionService {
     public List<Transaction> getTransactionsByAccountId(Long accountId) {
         return transactionRepository.findByAccountId(accountId);
     }
+
+    @Override
+    public BigDecimal calculateLoansAmount(Long accountId) {
+        List<Transaction> loanTransactions = transactionRepository
+                .findTransactionsByAccountIdAndTransactionType(accountId, "LOAN");
+
+        BigDecimal totalLoansAmount = BigDecimal.ZERO;
+
+        for (Transaction transaction : loanTransactions) {
+            totalLoansAmount = totalLoansAmount.add(transaction.getAmount());
+        }
+
+        return totalLoansAmount;
+    }
+
+    @Override
+    public BigDecimal calculateInterestOnLoans(Long accountId) {
+        List<Transaction> interestTransactions = transactionRepository
+                .findTransactionsByAccountIdAndTransactionType(accountId, "LOAN_INTEREST");
+        BigDecimal totalInterestOnLoans = BigDecimal.ZERO;
+        for (Transaction transaction : interestTransactions) {
+            totalInterestOnLoans = totalInterestOnLoans.add(transaction.getAmount());
+        }
+
+        return totalInterestOnLoans;
+    }
 }

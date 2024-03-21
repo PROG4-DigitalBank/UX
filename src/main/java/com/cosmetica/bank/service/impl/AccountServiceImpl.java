@@ -6,6 +6,7 @@ import com.cosmetica.bank.model.Transaction;
 import com.cosmetica.bank.repository.AccountRepository;
 import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.AccountService;
+import com.cosmetica.bank.service.TransactionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +22,8 @@ public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private TransactionService transactionService;
 
     @Override
     public Account createAccount(Account account) {
@@ -143,6 +146,14 @@ public class AccountServiceImpl implements AccountService {
         } else {
             throw new IllegalArgumentException("Account not found");
         }
+    }
+
+    @Override
+    public BigDecimal getCurrentBalanceWithLoansAndInterest(Long accountId) {
+        BigDecimal principalBalance = getCurrentBalance(accountId);
+        BigDecimal loansAmount = transactionService.calculateLoansAmount(accountId);
+        BigDecimal interestOnLoans = transactionService.calculateInterestOnLoans(accountId);
+        return principalBalance.add(loansAmount).add(interestOnLoans);
     }
 
     @Override
