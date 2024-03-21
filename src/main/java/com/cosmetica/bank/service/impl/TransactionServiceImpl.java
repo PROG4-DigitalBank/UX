@@ -1,8 +1,6 @@
 package com.cosmetica.bank.service.impl;
 
-import com.cosmetica.bank.model.Account;
 import com.cosmetica.bank.model.Transaction;
-import com.cosmetica.bank.repository.AccountRepository;
 import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +15,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionRepository transactionRepository;
-    @Autowired
-    private AccountRepository accountRepository;
 
     @Override
     public String deposit(Long accountId, BigDecimal amount) {
@@ -81,41 +77,5 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<Transaction> getTransactionsByAccountId(Long accountId) {
         return transactionRepository.findByAccountId(accountId);
-    }
-
-    @Override
-    public void applyInterestOnOverdraft(Long accountId) {
-        // Retrieve details of the account associated with the account ID
-        Account account = accountRepository.findById(accountId);
-
-        if (account != null) {
-            // Check if overdraft is allowed for this account
-            if (account.isAllowsOverdraft()) {
-                // Check if the account balance is less than zero (overdraft)
-                if (account.getBalance().compareTo(BigDecimal.ZERO) < 0) {
-                    // Calculate interest on the overdraft
-                    BigDecimal overdraftBalance = account.getBalance().abs();
-                    BigDecimal interestRate = account.getOverdraftInterestRate();
-                    BigDecimal interest = overdraftBalance.multiply(interestRate);
-
-                    // Add the interest to the account balance
-                    account.setBalance(account.getBalance().add(interest));
-
-                    // Save the changes to the account repository
-                    accountRepository.save(account);
-
-                    // Record the overdraft interest transaction
-                    Transaction transaction = new Transaction();
-                    transaction.setAccountId(accountId);
-                    transaction.setAmount(interest);
-                    transaction.setTransactionType("OVERDRAFT_INTEREST");
-                    transactionRepository.save(transaction);
-                }
-            } else {
-                throw new IllegalArgumentException("Overdraft is not allowed for this account.");
-            }
-        } else {
-            throw new IllegalArgumentException("Account not found.");
-        }
     }
 }

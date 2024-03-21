@@ -43,10 +43,4 @@ public class TransactionController {
         List<Transaction> transactions = transactionService.getTransactionsByAccountId(accountId);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
-
-    @PostMapping("/applyInterestOnOverdraft")
-    public ResponseEntity<String> applyInterestOnOverdraft(@RequestParam Long accountId) {
-        transactionService.applyInterestOnOverdraft(accountId);
-        return new ResponseEntity<>("Interest applied on overdraft successfully.", HttpStatus.OK);
-    }
 }

@@ -13,7 +13,5 @@ public interface TransactionService {
 
     String transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount);
 
-    void applyInterestOnOverdraft(Long accountId);
-
     List<Transaction> getTransactionsByAccountId(Long accountId);
 }
