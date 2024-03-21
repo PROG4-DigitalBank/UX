@@ -105,12 +105,12 @@ public class AccountServiceImpl implements AccountService {
                 LocalDateTime today = LocalDateTime.now();
                 LocalDateTime sevenDaysAfterCreation = account.getCreatedAt().plusDays(7);
                 BigDecimal interestRate;
-                if (today.isBefore(sevenDaysAfterCreation)) {
-                    // Within the first seven days
-                    interestRate = interestRateFirstSevenDays;
-                } else {
+                if (today.isAfter(sevenDaysAfterCreation)) {
                     // After the first seven days
                     interestRate = interestRateAfterSevenDays;
+                } else {
+                    // Within the first seven days
+                    interestRate = interestRateFirstSevenDays;
                 }
                 BigDecimal interest = balance.abs().multiply(interestRate);
                 account.setBalance(balance.add(interest));
