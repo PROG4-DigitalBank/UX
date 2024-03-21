@@ -165,4 +165,15 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("Account not found");
         }
     }
+
+    @Override
+    public String getBankName(Long accountId) {
+        // Retrieve the account from the repository
+        Account account = accountRepository.findById(accountId);
+        if (account != null) {
+            return account.getBankName();
+        } else {
+            throw new IllegalArgumentException("Account not found");
+        }
+    }
 }
