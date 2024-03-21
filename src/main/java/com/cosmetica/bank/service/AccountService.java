@@ -4,14 +4,29 @@ package com.cosmetica.bank.service;
 import com.cosmetica.bank.model.Account;
 
 import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.List;
 
 public interface AccountService {
-    Optional<Account> getAccountById(Long accountId);
+    Account createAccount(Account account);
 
-    BigDecimal calculateAllowedCredit(BigDecimal monthlySalary);
+    Account updateAccount(Account account);
 
-    boolean isOverdraftAllowed(Account account);
+    Account getAccountById(Long accountId);
 
-    boolean isSufficientFunds(Account account, BigDecimal amount);
+    List<Account> getAllAccounts();
+
+    BigDecimal getCurrentBalance(Long accountId);
+
+    void deleteAccount(Long accountId);
+
+    void enableOverdraft(Long accountId);
+
+    void disableOverdraft(Long accountId);
+
+    boolean isOverdraftEnabled(Long accountId);
+
+    BigDecimal calculateAllowedCredit(Long accountId);
+
+    void updateOverdraftInterestRates(Long accountId, BigDecimal interestRateFirstSevenDays,
+            BigDecimal interestRateAfterSevenDays);
 }

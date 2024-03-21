@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -15,6 +15,6 @@ public class Transaction {
     private Long accountId;
     private BigDecimal amount;
     private String transactionType;
-    private Timestamp transactionDate;
+    private LocalDateTime transactionDate;
     private String transactionReason;
 }

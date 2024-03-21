@@ -8,11 +8,15 @@ CREATE TABLE customers (
     phone_number VARCHAR(20),
 );
 
+-- Création d'une séquence pour générer des numéros de compte uniques
+CREATE SEQUENCE account_number_sequence START 100000 INCREMENT 1;
+
+
 -- Table for storing account information
 CREATE TABLE accounts (
     account_id SERIAL PRIMARY KEY,
     customer_id INT REFERENCES customers(customer_id),
-    account_number VARCHAR(20) UNIQUE NOT NULL,
+    account_number VARCHAR(20) UNIQUE NOT NULL DEFAULT CONCAT('AC-', NEXTVAL('account_number_sequence')),
     balance DECIMAL(15, 2) DEFAULT 0.00,
     monthly_salary DECIMAL(15, 2) NOT NULL 
     allows_overdraft BOOLEAN DEFAULT FALSE,

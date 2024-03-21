@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
             statement.setLong(1, entity.getAccountId());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
-            statement.setTimestamp(4, entity.getTransactionDate());
+            statement.setObject(4, entity.getTransactionDate());
             statement.setString(5, entity.getTransactionReason());
 
             int affectedRows = statement.executeUpdate();
@@ -84,7 +85,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
             statement.setLong(1, entity.getAccountId());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
-            statement.setTimestamp(4, entity.getTransactionDate());
+            statement.setObject(4, entity.getTransactionDate());
             statement.setString(5, entity.getTransactionReason());
             statement.setLong(6, entity.getTransactionId());
 
@@ -117,13 +118,28 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
         }
     }
 
+    public List<Transaction> findByAccountId(Long accountId) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE account_id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setLong(1, accountId);
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                transactions.add(extractTransactionFromResultSet(resultSet));
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Error finding transactions by account ID.", ex);
+        }
+        return transactions;
+    }
+
     private Transaction extractTransactionFromResultSet(ResultSet resultSet) throws SQLException {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(resultSet.getLong("transaction_id"));
         transaction.setAccountId(resultSet.getLong("account_id"));
         transaction.setAmount(resultSet.getBigDecimal("amount"));
         transaction.setTransactionType(resultSet.getString("transaction_type"));
-        transaction.setTransactionDate(resultSet.getTimestamp("transaction_date"));
+        transaction.setTransactionDate(resultSet.getObject("transaction_date", LocalDateTime.class));
         transaction.setTransactionReason(resultSet.getString("transaction_reason"));
         return transaction;
     }
