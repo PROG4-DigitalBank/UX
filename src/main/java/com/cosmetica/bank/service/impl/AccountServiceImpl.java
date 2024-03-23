@@ -27,12 +27,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account createAccount(Account account) {
-        account.setBalance(BigDecimal.ZERO);
-        account.setAllowsOverdraft(false);
-        account.setCreatedAt(LocalDateTime.now());
+        try {
+            account.setBalance(BigDecimal.ZERO);
+            account.setCreatedAt(LocalDateTime.now());
 
-        accountRepository.save(account);
-        throw new UnsupportedOperationException("Unimplemented method 'createAccount'");
+            return accountRepository.save(account);
+        } catch (Exception ex) {
+            throw new IllegalArgumentException("Erreur lors de la création du compte", ex);
+        }
     }
 
     @Override
@@ -161,17 +163,6 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findById(accountId);
         if (account != null) {
             return account.isAllowsOverdraft();
-        } else {
-            throw new IllegalArgumentException("Account not found");
-        }
-    }
-
-    @Override
-    public String getBankName(Long accountId) {
-        // Retrieve the account from the repository
-        Account account = accountRepository.findById(accountId);
-        if (account != null) {
-            return account.getBankName();
         } else {
             throw new IllegalArgumentException("Account not found");
         }

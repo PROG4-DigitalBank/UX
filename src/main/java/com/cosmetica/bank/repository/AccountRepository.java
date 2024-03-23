@@ -164,6 +164,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
         account.setOverdraftInterestRate(resultSet.getBigDecimal("overdraft_interest_rate"));
         account.setLoanInterest(resultSet.getBigDecimal("loan_interest"));
         account.setCreatedAt(resultSet.getTimestamp("created_at").toLocalDateTime());
+        account.setBankName(resultSet.getString("bank_name"));
         return account;
     }
 }
