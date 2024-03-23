@@ -167,4 +167,8 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("Account not found");
         }
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 6ee46c0 (fix: Delete bankName method in AccountServiceImpl)
 }
