@@ -21,14 +21,16 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public Transaction save(Transaction entity) {
-        String sql = "INSERT INTO customers (account_id, amount, transaction_type, transaction_date, transaction_reason) "
-                + "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (account_id, amount, transaction_type, transaction_date, transaction_reason, effective_date_time, transaction_status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             statement.setLong(1, entity.getAccountId());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
             statement.setObject(4, entity.getTransactionDate());
             statement.setString(5, entity.getTransactionReason());
+            statement.setObject(6, entity.getEffectiveDateTime());
+            statement.setString(7, entity.getTransactionStatus());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -37,7 +39,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    entity.setAccountId(generatedKeys.getLong(1));
+                    entity.setTransactionId(generatedKeys.getLong(1));
                 } else {
                     throw new SQLException("Transaction creation failed, no ID obtained.");
                 }
@@ -80,14 +82,16 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public Transaction update(Transaction entity) {
-        String sql = "UPDATE transactions SET account_id = ?, amount = ?, transaction_type = ?, transaction_date = ?, transaction_reason = ? WHERE id = ?";
+        String sql = "UPDATE transactions SET account_id = ?, amount = ?, transaction_type = ?, transaction_date = ?, transaction_reason = ?, effective_date_time = ?, transaction_status = ? WHERE transaction_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, entity.getAccountId());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
             statement.setObject(4, entity.getTransactionDate());
             statement.setString(5, entity.getTransactionReason());
-            statement.setLong(6, entity.getTransactionId());
+            statement.setObject(6, entity.getEffectiveDateTime());
+            statement.setString(7, entity.getTransactionStatus());
+            statement.setLong(8, entity.getTransactionId());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -157,6 +161,8 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
         transaction.setTransactionType(resultSet.getString("transaction_type"));
         transaction.setTransactionDate(resultSet.getObject("transaction_date", LocalDateTime.class));
         transaction.setTransactionReason(resultSet.getString("transaction_reason"));
+        transaction.setEffectiveDateTime(resultSet.getObject("effective_date_time", LocalDateTime.class));
+        transaction.setTransactionStatus(resultSet.getString("transaction_status"));
         return transaction;
     }
 }
