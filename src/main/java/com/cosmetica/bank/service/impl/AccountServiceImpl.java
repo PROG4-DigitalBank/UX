@@ -33,7 +33,7 @@ public class AccountServiceImpl implements AccountService {
 
             return accountRepository.save(account);
         } catch (Exception ex) {
-            throw new IllegalArgumentException("Erreur lors de la création du compte", ex);
+            throw new IllegalArgumentException("Error creating the account", ex);
         }
     }
 
@@ -167,8 +167,4 @@ public class AccountServiceImpl implements AccountService {
             throw new IllegalArgumentException("Account not found");
         }
     }
-<<<<<<< HEAD
-=======
-
->>>>>>> 6ee46c0 (fix: Delete bankName method in AccountServiceImpl)
 }
