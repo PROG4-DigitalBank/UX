@@ -17,4 +17,6 @@ public class Transaction {
     private String transactionType;
     private LocalDateTime transactionDate;
     private String transactionReason;
+    private LocalDateTime effectiveDateTime;
+    private String transactionStatus;
 }
