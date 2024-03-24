@@ -104,4 +104,34 @@ public class TransactionServiceImpl implements TransactionService {
 
         return totalInterestOnLoans;
     }
+
+    @Override
+    public String scheduleTransfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount, LocalDateTime effectiveDateTime) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Transfer amount must be greater than zero.");
+        }
+
+        Transaction transaction = new Transaction();
+        transaction.setAccountId(sourceAccountId);
+        transaction.setAmount(amount.negate()); // Negative amount for debit
+        transaction.setTransactionType("SCHEDULED_TRANSFER");
+        transaction.setTransactionDate(effectiveDateTime); // Set the effective date and time
+        transaction.setTransactionStatus("PLANNED"); // Set the status as planned
+
+        transactionRepository.save(transaction);
+
+        return "Transfer scheduled successfully.";
+    }
+
+    @Override
+    public String cancelScheduledTransfer(Long transactionId) {
+        Transaction transaction = transactionRepository.findById(transactionId);
+        if (transaction != null) {
+            transaction.setTransactionStatus("CANCELLED");
+            transactionRepository.save(transaction);
+            return "Scheduled transfer cancelled successfully.";
+        } else {
+            throw new IllegalArgumentException("Transaction not found.");
+        }
+    }
 }
