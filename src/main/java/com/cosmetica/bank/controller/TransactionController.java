@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -35,6 +36,20 @@ public class TransactionController {
     public ResponseEntity<String> transfer(@RequestParam Long sourceAccountId, @RequestParam Long targetAccountId,
             @RequestParam BigDecimal amount) {
         String message = transactionService.transfer(sourceAccountId, targetAccountId, amount);
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+
+    @PostMapping("/schedule-transfer")
+    public ResponseEntity<String> scheduleTransfer(@RequestParam Long sourceAccountId, @RequestParam Long targetAccountId,
+                                                   @RequestParam BigDecimal amount, @RequestParam String effectiveDateTime) {
+        LocalDateTime dateTime = LocalDateTime.parse(effectiveDateTime);
+        String message = transactionService.scheduleTransfer(sourceAccountId, targetAccountId, amount, dateTime);
+        return new ResponseEntity<>(message, HttpStatus.OK);
+    }
+
+    @PostMapping("/cancel-scheduled-transfer")
+    public ResponseEntity<String> cancelScheduledTransfer(@RequestParam Long transactionId) {
+        String message = transactionService.cancelScheduledTransfer(transactionId);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
