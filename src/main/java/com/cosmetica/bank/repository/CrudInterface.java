@@ -7,7 +7,8 @@ public interface CrudInterface<T, ID> {
     T save(T entity);
 
     // Read
-    T findById(ID id);
+    T findByAccountNumber(String accountNumber);
+
     List<T> findAll();
 
     // Update

@@ -1,34 +1,32 @@
-// AccountService.java
 package com.cosmetica.bank.service;
 
 import com.cosmetica.bank.model.Account;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface AccountService {
     Account createAccount(Account account);
 
     Account updateAccount(Account account);
-
-    Account getAccountById(Long accountId);
-
+    Account getAccountByAccountNumber(String accountNumber);
     List<Account> getAllAccounts();
 
-    BigDecimal getCurrentBalance(Long accountId);
+    BigDecimal getCurrentBalance(String accountNumber);
 
-    BigDecimal getCurrentBalanceWithLoansAndInterest(Long accountId);
+    BigDecimal getCurrentBalanceWithLoansAndInterest(String accountNumber);
 
-    void deleteAccount(Long accountId);
+    void deleteAccount(String accountNumber);
 
-    void enableOverdraft(Long accountId);
+    void enableOverdraft(String accountNumber);
 
-    void disableOverdraft(Long accountId);
+    void disableOverdraft(String accountNumber);
 
-    boolean isOverdraftEnabled(Long accountId);
+    boolean isOverdraftEnabled(String accountNumber);
 
-    BigDecimal calculateAllowedCredit(Long accountId);
+    BigDecimal calculateAllowedCredit(String accountNumber);
 
-    void updateOverdraftInterestRates(Long accountId, BigDecimal interestRateFirstSevenDays,
-            BigDecimal interestRateAfterSevenDays);
+    void updateOverdraftInterestRates(String accountNumber, BigDecimal interestRateFirstSevenDays,
+                                      BigDecimal interestRateAfterSevenDays);
 }

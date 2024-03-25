@@ -1,16 +1,15 @@
 package com.cosmetica.bank.repository;
 
+import com.cosmetica.bank.model.Account;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import com.cosmetica.bank.model.Account;
-
-public class AccountRepository implements CrudInterface<Account, Long> {
+public class AccountRepository implements CrudInterface<Account, String> {
     private final Connection connection;
 
     public AccountRepository(Connection connection) {
@@ -19,18 +18,20 @@ public class AccountRepository implements CrudInterface<Account, Long> {
 
     @Override
     public Account save(Account entity) {
-        String sql = "INSERT INTO accounts (customer_id, account_number, balance, monthly_salary, allows_overdraft, overdraft_limit, overdraft_interest_rate, loan_interest, bank_name) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO accounts (first_name, last_name, account_number, balance, monthly_salary, date_of_birth, allows_overdraft, overdraft_limit, overdraft_interest_rate, loan_interest, bank_name) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setLong(1, entity.getCustomerId());
-            statement.setString(2, entity.getAccountNumber());
-            statement.setBigDecimal(3, entity.getBalance());
-            statement.setBigDecimal(4, entity.getMonthlySalary());
-            statement.setBoolean(5, entity.isAllowsOverdraft());
-            statement.setBigDecimal(6, entity.getOverdraftLimit());
-            statement.setBigDecimal(7, entity.getOverdraftInterestRate());
-            statement.setBigDecimal(8, entity.getLoanInterest());
-            statement.setString(9, entity.getBankName());
+            statement.setString(1, entity.getFirstName());
+            statement.setString(2, entity.getLastName());
+            statement.setString(3, entity.getAccountNumber());
+            statement.setBigDecimal(4, entity.getBalance());
+            statement.setBigDecimal(5, entity.getMonthlySalary());
+            statement.setObject(6, entity.getDateOfBirth());
+            statement.setBoolean(7, entity.isAllowsOverdraft());
+            statement.setBigDecimal(8, entity.getOverdraftLimit());
+            statement.setBigDecimal(9, entity.getOverdraftInterestRate());
+            statement.setBigDecimal(10, entity.getLoanInterest());
+            statement.setString(11, entity.getBankName());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -39,7 +40,7 @@ public class AccountRepository implements CrudInterface<Account, Long> {
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
                 if (generatedKeys.next()) {
-                    entity.setAccountId(generatedKeys.getLong(1));
+                    entity.setAccountNumber(generatedKeys.getString(1)); // Set the generated account number
                 } else {
                     throw new SQLException("Creating account failed, no ID obtained.");
                 }
@@ -51,16 +52,16 @@ public class AccountRepository implements CrudInterface<Account, Long> {
     }
 
     @Override
-    public Account findById(Long id) {
-        String sql = "SELECT * FROM accounts WHERE account_id = ?";
+    public Account findByAccountNumber(String accountNumber) {
+        String sql = "SELECT * FROM accounts WHERE account_number = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, id);
+            statement.setString(1, accountNumber);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 return mapToAccount(resultSet);
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Error finding account by ID.", ex);
+            throw new RuntimeException("Error finding account by account number.", ex);
         }
         return null;
     }
@@ -82,17 +83,19 @@ public class AccountRepository implements CrudInterface<Account, Long> {
 
     @Override
     public Account update(Account entity) {
-        String sql = "UPDATE accounts SET customer_id = ?, account_number = ?, balance = ?, monthly_salary = ?, allows_overdraft = ?, overdraft_limit = ?, overdraft_interest_rate = ?, loan_interest = ? WHERE account_id = ?";
+        String sql = "UPDATE accounts SET first_name = ?, last_name = ?, balance = ?, monthly_salary = ?, date_of_birth = ?, allows_overdraft = ?, overdraft_limit = ?, overdraft_interest_rate = ?, loan_interest = ?, bank_name = ? WHERE account_number = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, entity.getCustomerId());
-            statement.setString(2, entity.getAccountNumber());
+            statement.setString(1, entity.getFirstName());
+            statement.setString(2, entity.getLastName());
             statement.setBigDecimal(3, entity.getBalance());
             statement.setBigDecimal(4, entity.getMonthlySalary());
-            statement.setBoolean(5, entity.isAllowsOverdraft());
-            statement.setBigDecimal(6, entity.getOverdraftLimit());
-            statement.setBigDecimal(7, entity.getOverdraftInterestRate());
-            statement.setBigDecimal(8, entity.getLoanInterest());
-            statement.setLong(9, entity.getAccountId());
+            statement.setDate(5, entity.getDateOfBirth());
+            statement.setBoolean(6, entity.isAllowsOverdraft());
+            statement.setBigDecimal(7, entity.getOverdraftLimit());
+            statement.setBigDecimal(8, entity.getOverdraftInterestRate());
+            statement.setBigDecimal(9, entity.getLoanInterest());
+            statement.setString(10, entity.getBankName());
+            statement.setString(11, entity.getAccountNumber());
 
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
@@ -106,14 +109,14 @@ public class AccountRepository implements CrudInterface<Account, Long> {
 
     @Override
     public void delete(Account entity) {
-        deleteById(entity.getAccountId());
+        deleteById(entity.getAccountNumber());
     }
 
     @Override
-    public void deleteById(Long id) {
-        String sql = "DELETE FROM accounts WHERE account_id = ?";
+    public void deleteById(String accountNumber) {
+        String sql = "DELETE FROM accounts WHERE account_number = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, id);
+            statement.setString(1, accountNumber);
             int affectedRows = statement.executeUpdate();
             if (affectedRows == 0) {
                 throw new SQLException("Deleting account failed, no rows affected.");
@@ -123,42 +126,14 @@ public class AccountRepository implements CrudInterface<Account, Long> {
         }
     }
 
-    public Optional<Account> findByAccountNumber(String accountNumber) {
-        String sql = "SELECT * FROM accounts WHERE account_number = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, accountNumber);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return Optional.of(mapToAccount(resultSet));
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Error finding account by account number.", ex);
-        }
-        return Optional.empty();
-    }
-
-    public List<Account> findByCustomerId(Long customerId) {
-        List<Account> accounts = new ArrayList<>();
-        String sql = "SELECT * FROM accounts WHERE customer_id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, customerId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                accounts.add(mapToAccount(resultSet));
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Error finding accounts by customer ID.", ex);
-        }
-        return accounts;
-    }
-
     private Account mapToAccount(ResultSet resultSet) throws SQLException {
         Account account = new Account();
-        account.setAccountId(resultSet.getLong("account_id"));
-        account.setCustomerId(resultSet.getLong("customer_id"));
         account.setAccountNumber(resultSet.getString("account_number"));
+        account.setFirstName(resultSet.getString("first_name"));
+        account.setLastName(resultSet.getString("last_name"));
         account.setBalance(resultSet.getBigDecimal("balance"));
         account.setMonthlySalary(resultSet.getBigDecimal("monthly_salary"));
+        account.setDateOfBirth(resultSet.getDate("date_of_birth"));
         account.setAllowsOverdraft(resultSet.getBoolean("allows_overdraft"));
         account.setOverdraftLimit(resultSet.getBigDecimal("overdraft_limit"));
         account.setOverdraftInterestRate(resultSet.getBigDecimal("overdraft_interest_rate"));
@@ -168,3 +143,4 @@ public class AccountRepository implements CrudInterface<Account, Long> {
         return account;
     }
 }
+

@@ -1,4 +1,3 @@
-// AccountServiceImpl.java
 package com.cosmetica.bank.service.impl;
 
 import com.cosmetica.bank.model.Account;
@@ -6,7 +5,6 @@ import com.cosmetica.bank.model.Transaction;
 import com.cosmetica.bank.repository.AccountRepository;
 import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.AccountService;
-import com.cosmetica.bank.service.TransactionService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,14 +18,16 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private AccountRepository accountRepository;
+
     @Autowired
     private TransactionRepository transactionRepository;
-    @Autowired
-    private TransactionService transactionService;
 
     @Override
     public Account createAccount(Account account) {
         try {
+            account.setLoanInterest(BigDecimal.ZERO);
+            account.setOverdraftInterestRate(BigDecimal.ZERO);
+            account.setOverdraftLimit(BigDecimal.ZERO);
             account.setBalance(BigDecimal.ZERO);
             account.setCreatedAt(LocalDateTime.now());
 
@@ -39,20 +39,21 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account updateAccount(Account account) {
-        Account existingAccount = accountRepository.findById(account.getAccountId());
-        if (existingAccount == null) {
+        Account existingAccount = accountRepository.findByAccountNumber(account.getAccountNumber());
+        if (existingAccount != null) {
+            return accountRepository.save(account);
+        } else {
             throw new IllegalArgumentException("Account does not exist.");
         }
-
-        return accountRepository.save(account);
     }
 
     @Override
-    public Account getAccountById(Long accountId) {
-        try {
-            return accountRepository.findById(accountId);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Account not found.");
+    public Account getAccountByAccountNumber(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account != null) {
+            return account;
+        } else {
+            throw new IllegalArgumentException("Account not found");
         }
     }
 
@@ -62,35 +63,40 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void deleteAccount(Long accountId) {
-        accountRepository.deleteById(accountId);
+    public void deleteAccount(String accountNumber) {
+        Account accountToDelete = accountRepository.findByAccountNumber(accountNumber);
+        if (accountToDelete != null) {
+            accountRepository.delete(accountToDelete);
+        } else {
+            throw new IllegalArgumentException("Account not found");
+        }
     }
 
     @Override
-    public void enableOverdraft(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+    public void enableOverdraft(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             account.setAllowsOverdraft(true);
-            accountRepository.update(account);
+            accountRepository.save(account);
         } else {
             throw new IllegalArgumentException("Account not found");
         }
     }
 
     @Override
-    public void disableOverdraft(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+    public void disableOverdraft(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             account.setAllowsOverdraft(false);
-            accountRepository.update(account);
+            accountRepository.save(account);
         } else {
             throw new IllegalArgumentException("Account not found");
         }
     }
 
     @Override
-    public BigDecimal calculateAllowedCredit(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+    public BigDecimal calculateAllowedCredit(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             BigDecimal monthlySalary = account.getMonthlySalary();
             return monthlySalary.divide(new BigDecimal(3));
@@ -100,9 +106,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public void updateOverdraftInterestRates(Long accountId, BigDecimal interestRateFirstSevenDays,
-            BigDecimal interestRateAfterSevenDays) {
-        Account account = accountRepository.findById(accountId);
+    public void updateOverdraftInterestRates(String accountNumber, BigDecimal interestRateFirstSevenDays,
+                                             BigDecimal interestRateAfterSevenDays) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             BigDecimal balance = account.getBalance();
             if (balance.compareTo(BigDecimal.ZERO) < 0) {
@@ -121,11 +127,11 @@ public class AccountServiceImpl implements AccountService {
                 if (interestRate.compareTo(account.getOverdraftInterestRate()) != 0) {
                     BigDecimal interest = balance.abs().multiply(interestRate);
                     account.setBalance(balance.add(interest));
-                    accountRepository.update(account);
+                    accountRepository.save(account);
 
                     // Recording the overdraft interest transaction
                     Transaction transaction = new Transaction();
-                    transaction.setAccountId(accountId);
+                    transaction.setAccountNumber(accountNumber);
                     transaction.setAmount(interest);
                     transaction.setTransactionType("OVERDRAFT_INTEREST");
                     transactionRepository.save(transaction);
@@ -141,8 +147,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public BigDecimal getCurrentBalance(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+    public BigDecimal getCurrentBalance(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             return account.getBalance();
         } else {
@@ -151,16 +157,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public BigDecimal getCurrentBalanceWithLoansAndInterest(Long accountId) {
-        BigDecimal principalBalance = getCurrentBalance(accountId);
-        BigDecimal loansAmount = transactionService.calculateLoansAmount(accountId);
-        BigDecimal interestOnLoans = transactionService.calculateInterestOnLoans(accountId);
+    public BigDecimal getCurrentBalanceWithLoansAndInterest(String accountNumber) {
+        BigDecimal principalBalance = getCurrentBalance(accountNumber);
+        BigDecimal loansAmount = transactionRepository.calculateLoansAmount(accountNumber);
+        BigDecimal interestOnLoans = transactionRepository.calculateInterestOnLoans(accountNumber);
         return principalBalance.add(loansAmount).add(interestOnLoans);
     }
 
     @Override
-    public boolean isOverdraftEnabled(Long accountId) {
-        Account account = accountRepository.findById(accountId);
+    public boolean isOverdraftEnabled(String accountNumber) {
+        Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             return account.isAllowsOverdraft();
         } else {

@@ -25,9 +25,9 @@ public class AccountController {
         return new ResponseEntity<>(createdAccount, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{accountId}")
-    public ResponseEntity<Account> getAccountById(@PathVariable Long accountId) {
-        Account account = accountService.getAccountById(accountId);
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<Account> getAccountByAccountNumber(@PathVariable String accountNumber) {
+        Account account = accountService.getAccountByAccountNumber(accountNumber);
         return ResponseEntity.ok(account);
     }
 
@@ -43,53 +43,53 @@ public class AccountController {
         return ResponseEntity.ok(updatedAccount);
     }
 
-    @DeleteMapping("/{accountId}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId) {
-        accountService.deleteAccount(accountId);
+    @DeleteMapping("/{accountNumber}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable String accountNumber) {
+        accountService.deleteAccount(accountNumber);
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/{accountId}/enable-overdraft")
-    public ResponseEntity<Void> enableOverdraft(@PathVariable Long accountId) {
-        accountService.enableOverdraft(accountId);
+    @PutMapping("/{accountNumber}/enable-overdraft")
+    public ResponseEntity<Void> enableOverdraft(@PathVariable String accountNumber) {
+        accountService.enableOverdraft(accountNumber);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{accountId}/disable-overdraft")
-    public ResponseEntity<Void> disableOverdraft(@PathVariable Long accountId) {
-        accountService.disableOverdraft(accountId);
+    @PutMapping("/{accountNumber}/disable-overdraft")
+    public ResponseEntity<Void> disableOverdraft(@PathVariable String accountNumber) {
+        accountService.disableOverdraft(accountNumber);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{accountId}/calculate-allowed-credit")
-    public ResponseEntity<BigDecimal> calculateAllowedCredit(@PathVariable Long accountId) {
-        BigDecimal allowedCredit = accountService.calculateAllowedCredit(accountId);
+    @GetMapping("/{accountNumber}/calculate-allowed-credit")
+    public ResponseEntity<BigDecimal> calculateAllowedCredit(@PathVariable String accountNumber) {
+        BigDecimal allowedCredit = accountService.calculateAllowedCredit(accountNumber);
         return ResponseEntity.ok(allowedCredit);
     }
 
-    @PutMapping("/{accountId}/update-overdraft-interest-rates")
-    public ResponseEntity<Void> updateOverdraftInterestRates(@PathVariable Long accountId,
-            @RequestParam BigDecimal interestRateFirstSevenDays,
-            @RequestParam BigDecimal interestRateAfterSevenDays) {
-        accountService.updateOverdraftInterestRates(accountId, interestRateFirstSevenDays, interestRateAfterSevenDays);
+    @PutMapping("/{accountNumber}/update-overdraft-interest-rates")
+    public ResponseEntity<Void> updateOverdraftInterestRates(@PathVariable String accountNumber,
+                                                             @RequestParam BigDecimal interestRateFirstSevenDays,
+                                                             @RequestParam BigDecimal interestRateAfterSevenDays) {
+        accountService.updateOverdraftInterestRates(accountNumber, interestRateFirstSevenDays, interestRateAfterSevenDays);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{accountId}/current-balance")
-    public ResponseEntity<BigDecimal> getCurrentBalance(@PathVariable Long accountId) {
-        BigDecimal balance = accountService.getCurrentBalance(accountId);
+    @GetMapping("/{accountNumber}/current-balance")
+    public ResponseEntity<BigDecimal> getCurrentBalance(@PathVariable String accountNumber) {
+        BigDecimal balance = accountService.getCurrentBalance(accountNumber);
         return ResponseEntity.ok(balance);
     }
 
-    @GetMapping("/{accountId}/is-overdraft-enabled")
-    public ResponseEntity<Boolean> isOverdraftEnabled(@PathVariable Long accountId) {
-        boolean overdraftEnabled = accountService.isOverdraftEnabled(accountId);
+    @GetMapping("/{accountNumber}/is-overdraft-enabled")
+    public ResponseEntity<Boolean> isOverdraftEnabled(@PathVariable String accountNumber) {
+        boolean overdraftEnabled = accountService.isOverdraftEnabled(accountNumber);
         return ResponseEntity.ok(overdraftEnabled);
     }
 
-    @GetMapping("/{accountId}/current-balance-with-loans-and-interest")
-    public ResponseEntity<BigDecimal> getCurrentBalanceWithLoansAndInterest(@PathVariable Long accountId) {
-        BigDecimal balanceWithLoansAndInterest = accountService.getCurrentBalanceWithLoansAndInterest(accountId);
+    @GetMapping("/{accountNumber}/current-balance-with-loans-and-interest")
+    public ResponseEntity<BigDecimal> getCurrentBalanceWithLoansAndInterest(@PathVariable String accountNumber) {
+        BigDecimal balanceWithLoansAndInterest = accountService.getCurrentBalanceWithLoansAndInterest(accountNumber);
         return ResponseEntity.ok(balanceWithLoansAndInterest);
     }
 
