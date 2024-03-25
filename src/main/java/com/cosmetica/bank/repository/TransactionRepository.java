@@ -21,10 +21,10 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public Transaction save(Transaction entity) {
-        String sql = "INSERT INTO transactions (account_id, amount, transaction_type, transaction_date, transaction_reason, effective_date_time, transaction_status) "
+        String sql = "INSERT INTO transactions (account_number, amount, transaction_type, transaction_date, transaction_reason, effective_date_time, transaction_status) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            statement.setLong(1, entity.getAccountId());
+            statement.setString(1, entity.getAccountNumber());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
             statement.setObject(4, entity.getTransactionDate());
@@ -51,21 +51,6 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
     }
 
     @Override
-    public Transaction findById(Long id) {
-        String sql = "SELECT * FROM transactions WHERE id = ?";
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, id);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.next()) {
-                return extractTransactionFromResultSet(resultSet);
-            }
-        } catch (SQLException ex) {
-            throw new RuntimeException("Error finding transaction by ID.", ex);
-        }
-        return null;
-    }
-
-    @Override
     public List<Transaction> findAll() {
         List<Transaction> transactions = new ArrayList<>();
         String sql = "SELECT * FROM transactions";
@@ -82,9 +67,9 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public Transaction update(Transaction entity) {
-        String sql = "UPDATE transactions SET account_id = ?, amount = ?, transaction_type = ?, transaction_date = ?, transaction_reason = ?, effective_date_time = ?, transaction_status = ? WHERE transaction_id = ?";
+        String sql = "UPDATE transactions SET account_number = ?, amount = ?, transaction_type = ?, transaction_date = ?, transaction_reason = ?, effective_date_time = ?, transaction_status = ? WHERE transaction_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, entity.getAccountId());
+            statement.setString(1, entity.getAccountNumber());
             statement.setBigDecimal(2, entity.getAmount());
             statement.setString(3, entity.getTransactionType());
             statement.setObject(4, entity.getTransactionDate());
@@ -110,7 +95,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     @Override
     public void deleteById(Long id) {
-        String sql = "DELETE FROM transactions WHERE id = ?";
+        String sql = "DELETE FROM transactions WHERE transaction_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setLong(1, id);
             int affectedRows = statement.executeUpdate();
@@ -122,33 +107,48 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
         }
     }
 
-    public List<Transaction> findByAccountId(Long accountId) {
-        List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM transactions WHERE account_id = ?";
+    public Transaction findById(Long id) {
+        String sql = "SELECT * FROM transactions WHERE transaction_id = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, accountId);
+            statement.setLong(1, id);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return extractTransactionFromResultSet(resultSet);
+            } else {
+                throw new RuntimeException("Transaction not found with ID: " + id);
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("Error finding transaction by ID.", ex);
+        }
+    }
+
+    public List<Transaction> findByAccountNumber(String accountNumber) {
+        List<Transaction> transactions = new ArrayList<>();
+        String sql = "SELECT * FROM transactions WHERE account_number = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, accountNumber);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 transactions.add(extractTransactionFromResultSet(resultSet));
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Error finding transactions by account ID.", ex);
+            throw new RuntimeException("Error finding transactions by account number.", ex);
         }
         return transactions;
     }
 
-    public List<Transaction> findTransactionsByAccountIdAndTransactionType(Long accountId, String transactionType) {
+    public List<Transaction> findTransactionsByAccountNumberAndTransactionType(String accountNumber, String transactionType) {
         List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM transactions WHERE account_id = ? AND transaction_type = ?";
+        String sql = "SELECT * FROM transactions WHERE account_number = ? AND transaction_type = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setLong(1, accountId);
+            statement.setString(1, accountNumber);
             statement.setString(2, transactionType);
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 transactions.add(extractTransactionFromResultSet(resultSet));
             }
         } catch (SQLException ex) {
-            throw new RuntimeException("Error finding transactions by account ID and transaction type.", ex);
+            throw new RuntimeException("Error finding transactions by account number and transaction type.", ex);
         }
         return transactions;
     }
@@ -156,7 +156,7 @@ public class TransactionRepository implements CrudInterface<Transaction, Long> {
     private Transaction extractTransactionFromResultSet(ResultSet resultSet) throws SQLException {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(resultSet.getLong("transaction_id"));
-        transaction.setAccountId(resultSet.getLong("account_id"));
+        transaction.setAccountNumber(resultSet.getString("account_number"));
         transaction.setAmount(resultSet.getBigDecimal("amount"));
         transaction.setTransactionType(resultSet.getString("transaction_type"));
         transaction.setTransactionDate(resultSet.getObject("transaction_date", LocalDateTime.class));

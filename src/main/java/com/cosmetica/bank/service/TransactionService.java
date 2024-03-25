@@ -1,4 +1,3 @@
-// TransactionService.java
 package com.cosmetica.bank.service;
 
 import com.cosmetica.bank.model.Transaction;
@@ -8,18 +7,18 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TransactionService {
-    String deposit(Long accountId, BigDecimal amount);
+    String deposit(String accountNumber, BigDecimal amount);
 
-    String withdraw(Long accountId, BigDecimal amount);
+    String withdraw(String accountNumber, BigDecimal amount);
 
-    String transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount);
-    String scheduleTransfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount, LocalDateTime effectiveDateTime);
+    String transfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount);
+    String scheduleTransfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount, LocalDateTime effectiveDateTime);
 
     String cancelScheduledTransfer(Long transactionId);
 
-    BigDecimal calculateLoansAmount(Long accountId);
+    BigDecimal calculateLoansAmount(String accountNumber);
 
-    BigDecimal calculateInterestOnLoans(Long accountId);
+    BigDecimal calculateInterestOnLoans(String accountNumber);
 
-    List<Transaction> getTransactionsByAccountId(Long accountId);
+    List<Transaction> getTransactionsByAccountNumber(String accountNumber);
 }

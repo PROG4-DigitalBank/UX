@@ -17,13 +17,13 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
 
     @Override
-    public String deposit(Long accountId, BigDecimal amount) {
+    public String deposit(String accountNumber, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be greater than zero.");
         }
 
         Transaction transaction = new Transaction();
-        transaction.setAccountId(accountId);
+        transaction.setAccountNumber(accountNumber);
         transaction.setAmount(amount);
         transaction.setTransactionType("DEPOSIT");
         transaction.setTransactionDate(LocalDateTime.now());
@@ -34,13 +34,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String withdraw(Long accountId, BigDecimal amount) {
+    public String withdraw(String accountNumber, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Withdrawal amount must be greater than zero.");
         }
 
         Transaction transaction = new Transaction();
-        transaction.setAccountId(accountId);
+        transaction.setAccountNumber(accountNumber);
         transaction.setAmount(amount.negate()); // Negative amount for withdrawal
         transaction.setTransactionType("WITHDRAWAL");
         transaction.setTransactionDate(LocalDateTime.now());
@@ -51,19 +51,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String transfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount) {
+    public String transfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero.");
         }
 
         Transaction debitTransaction = new Transaction();
-        debitTransaction.setAccountId(sourceAccountId);
+        debitTransaction.setAccountNumber(sourceAccountNumber);
         debitTransaction.setAmount(amount.negate()); // Negative amount for debit
         debitTransaction.setTransactionType("TRANSFER");
         debitTransaction.setTransactionDate(LocalDateTime.now());
 
         Transaction creditTransaction = new Transaction();
-        creditTransaction.setAccountId(targetAccountId);
+        creditTransaction.setAccountNumber(targetAccountNumber);
         creditTransaction.setAmount(amount);
         creditTransaction.setTransactionType("TRANSFER");
         creditTransaction.setTransactionDate(LocalDateTime.now());
@@ -75,14 +75,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<Transaction> getTransactionsByAccountId(Long accountId) {
-        return transactionRepository.findByAccountId(accountId);
+    public List<Transaction> getTransactionsByAccountNumber(String accountNumber) {
+        return transactionRepository.findByAccountNumber(accountNumber);
     }
 
     @Override
-    public BigDecimal calculateLoansAmount(Long accountId) {
+    public BigDecimal calculateLoansAmount(String accountNumber) {
         List<Transaction> loanTransactions = transactionRepository
-                .findTransactionsByAccountIdAndTransactionType(accountId, "LOAN");
+                .findTransactionsByAccountNumberAndTransactionType(accountNumber, "LOAN");
 
         BigDecimal totalLoansAmount = BigDecimal.ZERO;
 
@@ -94,9 +94,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public BigDecimal calculateInterestOnLoans(Long accountId) {
+    public BigDecimal calculateInterestOnLoans(String accountNumber) {
         List<Transaction> interestTransactions = transactionRepository
-                .findTransactionsByAccountIdAndTransactionType(accountId, "LOAN_INTEREST");
+                .findTransactionsByAccountNumberAndTransactionType(accountNumber, "LOAN_INTEREST");
         BigDecimal totalInterestOnLoans = BigDecimal.ZERO;
         for (Transaction transaction : interestTransactions) {
             totalInterestOnLoans = totalInterestOnLoans.add(transaction.getAmount());
@@ -106,13 +106,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String scheduleTransfer(Long sourceAccountId, Long targetAccountId, BigDecimal amount, LocalDateTime effectiveDateTime) {
+    public String scheduleTransfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount, LocalDateTime effectiveDateTime) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero.");
         }
 
         Transaction transaction = new Transaction();
-        transaction.setAccountId(sourceAccountId);
+        transaction.setAccountNumber(sourceAccountNumber);
         transaction.setAmount(amount.negate()); // Negative amount for debit
         transaction.setTransactionType("SCHEDULED_TRANSFER");
         transaction.setTransactionDate(effectiveDateTime); // Set the effective date and time

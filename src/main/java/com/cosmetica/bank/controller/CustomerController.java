@@ -1,7 +1,6 @@
 // CustomerController.java
 package com.cosmetica.bank.controller;
 
-import com.cosmetica.bank.model.Customer;
 import com.cosmetica.bank.service.CustomerService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

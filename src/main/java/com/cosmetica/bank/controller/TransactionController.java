@@ -21,29 +21,28 @@ public class TransactionController {
     }
 
     @PostMapping("/deposit")
-    public ResponseEntity<String> deposit(@RequestParam Long accountId, @RequestParam BigDecimal amount) {
-        String message = transactionService.deposit(accountId, amount);
+    public ResponseEntity<String> deposit(@RequestParam String accountNumber, @RequestParam BigDecimal amount) {
+        String message = transactionService.deposit(accountNumber, amount);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PostMapping("/withdraw")
-    public ResponseEntity<String> withdraw(@RequestParam Long accountId, @RequestParam BigDecimal amount) {
-        String message = transactionService.withdraw(accountId, amount);
+    public ResponseEntity<String> withdraw(@RequestParam String accountNumber, @RequestParam BigDecimal amount) {
+        String message = transactionService.withdraw(accountNumber, amount);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PostMapping("/transfer")
-    public ResponseEntity<String> transfer(@RequestParam Long sourceAccountId, @RequestParam Long targetAccountId,
-            @RequestParam BigDecimal amount) {
-        String message = transactionService.transfer(sourceAccountId, targetAccountId, amount);
+    public ResponseEntity<String> transfer(@RequestParam String sourceAccountNumber, @RequestParam String targetAccountNumber,
+                                           @RequestParam BigDecimal amount) {
+        String message = transactionService.transfer(sourceAccountNumber, targetAccountNumber, amount);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     @PostMapping("/schedule-transfer")
-    public ResponseEntity<String> scheduleTransfer(@RequestParam Long sourceAccountId, @RequestParam Long targetAccountId,
-                                                   @RequestParam BigDecimal amount, @RequestParam String effectiveDateTime) {
-        LocalDateTime dateTime = LocalDateTime.parse(effectiveDateTime);
-        String message = transactionService.scheduleTransfer(sourceAccountId, targetAccountId, amount, dateTime);
+    public ResponseEntity<String> scheduleTransfer(@RequestParam String sourceAccountNumber, @RequestParam String targetAccountNumber,
+                                                   @RequestParam BigDecimal amount, @RequestParam LocalDateTime effectiveDateTime) {
+        String message = transactionService.scheduleTransfer(sourceAccountNumber, targetAccountNumber, amount, effectiveDateTime);
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
@@ -53,9 +52,9 @@ public class TransactionController {
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
-    @GetMapping("/{accountId}")
-    public ResponseEntity<List<Transaction>> getTransactionsByAccountId(@PathVariable Long accountId) {
-        List<Transaction> transactions = transactionService.getTransactionsByAccountId(accountId);
+    @GetMapping("/{accountNumber}")
+    public ResponseEntity<List<Transaction>> getTransactionsByAccountNumber(@PathVariable String accountNumber) {
+        List<Transaction> transactions = transactionService.getTransactionsByAccountNumber(accountNumber);
         return new ResponseEntity<>(transactions, HttpStatus.OK);
     }
 }

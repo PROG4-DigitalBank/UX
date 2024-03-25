@@ -51,7 +51,6 @@ public class AccountRepository implements CrudInterface<Account, String> {
         return entity;
     }
 
-    @Override
     public Account findByAccountNumber(String accountNumber) {
         String sql = "SELECT * FROM accounts WHERE account_number = ?";
         try (PreparedStatement statement = connection.prepareStatement(sql)) {

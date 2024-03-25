@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Transaction {
     private Long transactionId;
-    private Long accountId;
+    private String accountNumber;
     private BigDecimal amount;
     private String transactionType;
     private LocalDateTime transactionDate;

@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.cosmetica.bank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+
+    @Autowired TransactionService transactionService;
 
     @Override
     public Account createAccount(Account account) {
@@ -159,8 +162,8 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public BigDecimal getCurrentBalanceWithLoansAndInterest(String accountNumber) {
         BigDecimal principalBalance = getCurrentBalance(accountNumber);
-        BigDecimal loansAmount = transactionRepository.calculateLoansAmount(accountNumber);
-        BigDecimal interestOnLoans = transactionRepository.calculateInterestOnLoans(accountNumber);
+        BigDecimal loansAmount = transactionService.calculateLoansAmount(accountNumber);
+        BigDecimal interestOnLoans = transactionService.calculateInterestOnLoans(accountNumber);
         return principalBalance.add(loansAmount).add(interestOnLoans);
     }
 
