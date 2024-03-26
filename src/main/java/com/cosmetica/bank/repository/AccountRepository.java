@@ -1,6 +1,7 @@
 package com.cosmetica.bank.repository;
 
 import com.cosmetica.bank.model.Account;
+import org.springframework.stereotype.Repository;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +10,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Repository
 public class AccountRepository implements CrudInterface<Account, String> {
     private final Connection connection;
 

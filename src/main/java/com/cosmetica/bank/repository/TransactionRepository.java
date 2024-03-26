@@ -9,7 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.cosmetica.bank.model.Transaction;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class TransactionRepository implements CrudInterface<Transaction, Long> {
 
     // Connection to DB

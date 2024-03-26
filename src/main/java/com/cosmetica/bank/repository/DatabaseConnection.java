@@ -27,6 +27,7 @@ public class DatabaseConnection {
     private static final String USERNAME = properties.getProperty("db.username");
     private static final String PASSWORD = properties.getProperty("db.password");
 
+
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
