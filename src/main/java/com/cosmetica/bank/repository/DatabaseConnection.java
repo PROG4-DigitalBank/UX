@@ -7,8 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 
 @Configuration
 public class DatabaseConnection {
@@ -27,7 +27,7 @@ public class DatabaseConnection {
     private static final String USERNAME = properties.getProperty("db.username");
     private static final String PASSWORD = properties.getProperty("db.password");
 
-
+    @Bean
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
