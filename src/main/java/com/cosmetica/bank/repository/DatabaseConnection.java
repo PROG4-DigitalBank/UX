@@ -1,34 +1,32 @@
 package com.cosmetica.bank.repository;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Properties;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 @Configuration
 public class DatabaseConnection {
-
-    private static final Properties properties = new Properties();
-
-    static {
-        try {
-            properties.load(new FileInputStream("config.properties"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static final String URL = properties.getProperty("db.url");
-    private static final String USERNAME = properties.getProperty("db.username");
-    private static final String PASSWORD = properties.getProperty("db.password");
+    @Value("${DB_USERNAME}")
+    private String username;
+    @Value("${DB_PASSWORD}")
+    private String password;
+    @Value("${DB_URL}")
+    private String dbUrl;
 
     @Bean
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+    public Connection getConnection() throws SQLException {
+        Connection connection = null;
+        try {
+            connection = DriverManager.getConnection(dbUrl, username, password);
+            System.out.println("Connected to the database successfully.");
+        } catch (SQLException e) {
+            System.err.println("Error connecting to the database: " + e.getMessage());
+            throw new SQLException("Failed to connect to the database.", e);
+        }
+        return connection;
     }
 }
