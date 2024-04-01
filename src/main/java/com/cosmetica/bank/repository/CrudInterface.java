@@ -1,6 +1,5 @@
 package com.cosmetica.bank.repository;
 
-import org.springframework.data.annotation.Id;
 
 import java.util.List;
 
