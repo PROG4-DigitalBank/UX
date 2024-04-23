@@ -1,6 +1,8 @@
 package com.cosmetica.bank.service.impl;
 
+import com.cosmetica.bank.model.Account;
 import com.cosmetica.bank.model.Transaction;
+import com.cosmetica.bank.repository.AccountRepository;
 import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +18,22 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TransactionRepository transactionRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     @Override
     public String deposit(String accountNumber, BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Deposit amount must be greater than zero.");
         }
+
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new IllegalArgumentException("Account not found.");
+        }
+
+        BigDecimal newBalance = account.getBalance().add(amount);
+        account.setBalance(newBalance);
 
         Transaction transaction = new Transaction();
         transaction.setAccountNumber(accountNumber);
@@ -39,6 +52,19 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Withdrawal amount must be greater than zero.");
         }
 
+        Account account = accountRepository.findByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new IllegalArgumentException("Account not found.");
+        }
+
+        BigDecimal currentBalance = account.getBalance();
+        if (currentBalance.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient funds.");
+        }
+
+        BigDecimal newBalance = currentBalance.subtract(amount);
+        account.setBalance(newBalance);
+
         Transaction transaction = new Transaction();
         transaction.setAccountNumber(accountNumber);
         transaction.setAmount(amount.negate()); // Negative amount for withdrawal
@@ -55,6 +81,25 @@ public class TransactionServiceImpl implements TransactionService {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero.");
         }
+
+        Account sourceAccount = accountRepository.findByAccountNumber(sourceAccountNumber);
+        Account targetAccount = accountRepository.findByAccountNumber(targetAccountNumber);
+        if (sourceAccount == null || targetAccount == null) {
+            throw new IllegalArgumentException("Source or target account not found.");
+        }
+
+        BigDecimal currentBalance = sourceAccount.getBalance();
+        if (currentBalance.compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient funds for transfer.");
+        }
+
+        BigDecimal newSourceBalance = currentBalance.subtract(amount);
+        sourceAccount.setBalance(newSourceBalance);
+        accountRepository.save(sourceAccount);
+
+        BigDecimal targetBalance = targetAccount.getBalance().add(amount);
+        targetAccount.setBalance(targetBalance);
+        accountRepository.save(targetAccount);
 
         Transaction debitTransaction = new Transaction();
         debitTransaction.setAccountNumber(sourceAccountNumber);
@@ -106,7 +151,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public String scheduleTransfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount, LocalDateTime effectiveDateTime) {
+    public String scheduleTransfer(String sourceAccountNumber, String targetAccountNumber, BigDecimal amount,
+                                   LocalDateTime effectiveDateTime) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Transfer amount must be greater than zero.");
         }
