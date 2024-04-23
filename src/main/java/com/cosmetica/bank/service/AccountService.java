@@ -9,7 +9,9 @@ public interface AccountService {
     Account createAccount(Account account);
 
     Account updateAccount(Account account);
+
     Account getAccountByAccountNumber(String accountNumber);
+
     List<Account> getAllAccounts();
 
     BigDecimal getCurrentBalance(String accountNumber);
@@ -27,5 +29,5 @@ public interface AccountService {
     BigDecimal calculateAllowedCredit(String accountNumber);
 
     void updateOverdraftInterestRates(String accountNumber, BigDecimal interestRateFirstSevenDays,
-                                      BigDecimal interestRateAfterSevenDays);
+            BigDecimal interestRateAfterSevenDays);
 }

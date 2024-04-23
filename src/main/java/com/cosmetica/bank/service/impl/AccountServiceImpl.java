@@ -7,6 +7,9 @@ import com.cosmetica.bank.repository.TransactionRepository;
 import com.cosmetica.bank.service.AccountService;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -23,14 +26,32 @@ public class AccountServiceImpl implements AccountService {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    @Autowired TransactionService transactionService;
+    @Autowired
+    TransactionService transactionService;
+
+    @Autowired
+    private Connection connection; 
+
+    private String generateAccountNumber() throws SQLException {
+        String accountNumber = null;
+        try (Statement statement = connection.createStatement()) {
+            statement.execute("SELECT 'AC-' || nextval('account_number_sequence')");
+            statement.getResultSet().next();
+            accountNumber = statement.getResultSet().getString(1);
+        } catch (SQLException e) {
+            throw new SQLException("Failed to generate account number.", e);
+        }
+        return accountNumber;
+    }
 
     @Override
     public Account createAccount(Account account) {
         try {
+            account.setAccountNumber(generateAccountNumber());
             account.setLoanInterest(BigDecimal.ZERO);
             account.setOverdraftInterestRate(BigDecimal.ZERO);
             account.setOverdraftLimit(BigDecimal.ZERO);
+            account.setAllowsOverdraft(false);
             account.setBalance(BigDecimal.ZERO);
             account.setCreatedAt(LocalDateTime.now());
 
@@ -110,7 +131,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public void updateOverdraftInterestRates(String accountNumber, BigDecimal interestRateFirstSevenDays,
-                                             BigDecimal interestRateAfterSevenDays) {
+            BigDecimal interestRateAfterSevenDays) {
         Account account = accountRepository.findByAccountNumber(accountNumber);
         if (account != null) {
             BigDecimal balance = account.getBalance();
